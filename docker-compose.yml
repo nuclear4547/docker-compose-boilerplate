@@ -1,7 +1,7 @@
 version: '3'
 
 networks:
-  laravel:
+  network:
 
 
 services:
@@ -20,9 +20,8 @@ services:
       - php
       - redis
       - mysql
-      - mailhog
     networks:
-      - laravel
+      - network
 
   mysql:
     image: mariadb:10.6
@@ -38,7 +37,18 @@ services:
       SERVICE_TAGS: dev
       SERVICE_NAME: mysql
     networks:
-      - laravel
+      - network
+
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: homestead
+      POSTGRES_USER: homestead
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    networks:
+      - network
 
   php:
     build:
@@ -52,7 +62,7 @@ services:
     volumes:
       - ./src:/var/www/html:delegated
     networks:
-      - laravel
+      - network
 
   redis:
     image: redis:alpine
@@ -60,7 +70,7 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - laravel
+      - network
 
   composer:
     build:
@@ -75,7 +85,7 @@ services:
       - php
     entrypoint: [ 'composer', '--ignore-platform-reqs' ]
     networks:
-      - laravel
+      - network
 
   npm:
     image: node:current-alpine
@@ -88,7 +98,7 @@ services:
     working_dir: /var/www/html
     entrypoint: [ 'npm' ]
     networks:
-      - laravel
+      - network
 
   artisan:
     build:
@@ -103,12 +113,4 @@ services:
       - mysql
     entrypoint: [ 'php', '/var/www/html/artisan' ]
     networks:
-      - laravel
-
-  mailhog:
-    image: mailhog/mailhog:latest
-    ports:
-      - "1025:1025"
-      - "8025:8025"
-    networks:
-      - laravel
+      - network
